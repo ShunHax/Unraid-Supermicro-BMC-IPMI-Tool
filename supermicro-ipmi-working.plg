@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<PLUGIN name="supermicro-ipmi" author="ShunHax" version="1.0.0" support="https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool">
+  <DESCRIPTION>Manage IPMI compatible Supermicro motherboards with the IPMICFG utility.</DESCRIPTION>
+  <CHANGES>
+##supermicro-ipmi
+###1.0.0
+- Initial release
+- Automatic IPMICFG download and installation from Supermicro
+- Web-based BMC management interface
+- Power control, sensor monitoring, user management
+  </CHANGES>
+  <INSTALL>
+    <CMD>mkdir -p /usr/local/emhttp/plugins/supermicro-ipmi</CMD>
+    <CMD>echo "Plugin directory created successfully"</CMD>
+  </INSTALL>
+  <UNINSTALL>
+    <CMD>rm -rf /usr/local/emhttp/plugins/supermicro-ipmi</CMD>
+    <CMD>echo "Plugin removed successfully"</CMD>
+  </UNINSTALL>
+</PLUGIN> 
