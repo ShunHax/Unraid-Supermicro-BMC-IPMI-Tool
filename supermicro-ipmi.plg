@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<PLUGIN name="supermicro-ipmi" version="1.0.0" author="ShunHax" support="https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool">
+  <DESCRIPTION>Manage IPMI compatible Supermicro motherboards with the IPMICFG utility. Provides web-based interface for local and remote BMC management.</DESCRIPTION>
+  <CHANGELOG>
+    <ENTRY version="1.0.0" date="2024-01-01">
+      <CHANGE>Initial release</CHANGE>
+      <CHANGE>Automatic IPMICFG download and installation</CHANGE>
+      <CHANGE>Web-based BMC management interface</CHANGE>
+      <CHANGE>Power control, sensor monitoring, user management</CHANGE>
+    </ENTRY>
+  </CHANGELOG>
+  <FILES>
+    <FILE name="/usr/local/emhttp/plugins/supermicro-ipmi/plugin.php" />
+    <FILE name="/usr/local/emhttp/plugins/supermicro-ipmi/supermicro-ipmi.php" />
+    <FILE name="/usr/local/emhttp/plugins/supermicro-ipmi/settings.php" />
+    <FILE name="/usr/local/emhttp/plugins/supermicro-ipmi/includes/functions.php" />
+    <FILE name="/usr/local/emhttp/plugins/supermicro-ipmi/includes/ipmi.php" />
+    <FILE name="/usr/local/emhttp/plugins/supermicro-ipmi/includes/gui.php" />
+    <FILE name="/usr/local/emhttp/plugins/supermicro-ipmi/scripts/monitor.sh" />
+    <FILE name="/usr/local/emhttp/plugins/supermicro-ipmi/scripts/install_ipmicfg.sh" />
+    <FILE name="/usr/local/emhttp/plugins/supermicro-ipmi/css/style.css" />
+    <FILE name="/usr/local/emhttp/plugins/supermicro-ipmi/js/script.js" />
+    <FILE name="/usr/local/emhttp/plugins/supermicro-ipmi/images/icon.png" />
+  </FILES>
+  <INSTALL>
+    <CMD>mkdir -p /usr/local/emhttp/plugins/supermicro-ipmi</CMD>
+    <CMD>chmod +x /usr/local/emhttp/plugins/supermicro-ipmi/scripts/monitor.sh</CMD>
+    <CMD>chmod +x /usr/local/emhttp/plugins/supermicro-ipmi/scripts/install_ipmicfg.sh</CMD>
+    <CMD>chown -R root:root /usr/local/emhttp/plugins/supermicro-ipmi</CMD>
+  </INSTALL>
+  <UNINSTALL>
+    <CMD>rm -rf /usr/local/emhttp/plugins/supermicro-ipmi</CMD>
+    <CMD>rm -f /etc/cron.d/supermicro-ipmi</CMD>
+  </UNINSTALL>
+  <UPGRADE>
+    <CMD>chmod +x /usr/local/emhttp/plugins/supermicro-ipmi/scripts/monitor.sh</CMD>
+    <CMD>chmod +x /usr/local/emhttp/plugins/supermicro-ipmi/scripts/install_ipmicfg.sh</CMD>
+    <CMD>chown -R root:root /usr/local/emhttp/plugins/supermicro-ipmi</CMD>
+  </UPGRADE>
+</PLUGIN> 
