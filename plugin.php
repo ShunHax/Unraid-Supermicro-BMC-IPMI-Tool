@@ -146,24 +146,89 @@ function plugin_uninstall() {
 // Install IPMICFG utility
 function install_ipmicfg() {
     $ipmicfg_path = '/usr/local/sbin/ipmicfg';
+    $ipmicfg_url = 'https://www.supermicro.com/Bios/sw_download/897/IPMICFG_1.36.0_build.250225.zip';
+    $temp_dir = '/tmp/ipmicfg_install';
     
     if (!file_exists($ipmicfg_path)) {
-        // Download IPMICFG from Supermicro (this would need to be done manually)
-        // For now, we'll just create a placeholder
+        // Create temp directory
+        if (!is_dir($temp_dir)) {
+            mkdir($temp_dir, 0755, true);
+        }
+        
+        // Create sbin directory if it doesn't exist
         if (!is_dir(dirname($ipmicfg_path))) {
             mkdir(dirname($ipmicfg_path), 0755, true);
         }
         
-        // Create a script that checks for IPMICFG and provides instructions
-        $script = "#!/bin/bash\n";
-        $script .= "# IPMICFG utility placeholder\n";
-        $script .= "# Please download IPMICFG from Supermicro and place it here\n";
-        $script .= "# Download from: https://www.supermicro.com/support/faqs/faq.cfm?faq=16428\n";
-        $script .= "echo 'IPMICFG not found. Please download from Supermicro website.'\n";
-        $script .= "exit 1\n";
-        
-        file_put_contents($ipmicfg_path, $script);
-        chmod($ipmicfg_path, 0755);
+        try {
+            // Download IPMICFG
+            $zip_file = "$temp_dir/ipmicfg.zip";
+            $download_cmd = "wget -q -O '$zip_file' '$ipmicfg_url'";
+            exec($download_cmd, $output, $return_code);
+            
+            if ($return_code !== 0) {
+                throw new Exception("Failed to download IPMICFG from Supermicro");
+            }
+            
+            // Extract the zip file
+            $extract_cmd = "cd '$temp_dir' && unzip -q '$zip_file'";
+            exec($extract_cmd, $output, $return_code);
+            
+            if ($return_code !== 0) {
+                throw new Exception("Failed to extract IPMICFG archive");
+            }
+            
+            // Find the ipmicfg binary in the extracted files
+            $find_cmd = "find '$temp_dir' -name 'ipmicfg' -type f 2>/dev/null";
+            $ipmicfg_binary = trim(shell_exec($find_cmd));
+            
+            if (empty($ipmicfg_binary) || !file_exists($ipmicfg_binary)) {
+                throw new Exception("IPMICFG binary not found in downloaded archive");
+            }
+            
+            // Copy to system path
+            $copy_cmd = "cp '$ipmicfg_binary' '$ipmicfg_path'";
+            exec($copy_cmd, $output, $return_code);
+            
+            if ($return_code !== 0) {
+                throw new Exception("Failed to copy IPMICFG to system path");
+            }
+            
+            // Set proper permissions
+            chmod($ipmicfg_path, 0755);
+            chown($ipmicfg_path, 'root');
+            chgrp($ipmicfg_path, 'root');
+            
+            // Test the installation
+            $test_cmd = "$ipmicfg_path -s 2>/dev/null";
+            exec($test_cmd, $output, $return_code);
+            
+            if ($return_code !== 0) {
+                // Installation succeeded but test failed (might be normal if no BMC)
+                error_log("IPMICFG installed successfully but test failed (this may be normal if no BMC is present)");
+            }
+            
+            // Clean up temp directory
+            exec("rm -rf '$temp_dir'");
+            
+            error_log("IPMICFG successfully installed from Supermicro");
+            
+        } catch (Exception $e) {
+            error_log("IPMICFG installation failed: " . $e->getMessage());
+            
+            // Create a fallback script with download instructions
+            $script = "#!/bin/bash\n";
+            $script .= "# IPMICFG utility not found\n";
+            $script .= "# Automatic download failed. Please download manually:\n";
+            $script .= "# URL: $ipmicfg_url\n";
+            $script .= "# Then extract and copy the ipmicfg binary to this location\n";
+            $script .= "echo 'IPMICFG not found. Please download from Supermicro website.'\n";
+            $script .= "echo 'URL: $ipmicfg_url'\n";
+            $script .= "exit 1\n";
+            
+            file_put_contents($ipmicfg_path, $script);
+            chmod($ipmicfg_path, 0755);
+        }
     }
 }
 
