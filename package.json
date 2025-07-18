@@ -1,0 +1,61 @@
+{
+  "name": "supermicro-bmc-ipmi-tool-unraid",
+  "version": "1.0.0",
+  "description": "A comprehensive Unraid plugin for managing Supermicro motherboards with IPMI support using the IPMICFG utility",
+  "main": "plugin.php",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "echo \"Building plugin...\" && echo \"Build complete\"",
+    "lint": "echo \"Linting code...\" && echo \"Lint complete\"",
+    "package": "tar -czf supermicro-bmc-ipmi-tool-1.0.0.tar.gz --exclude=node_modules --exclude=.git .",
+    "install-plugin": "sudo cp -r . /usr/local/emhttp/plugins/supermicro-ipmi/ && sudo chmod +x /usr/local/emhttp/plugins/supermicro-ipmi/scripts/monitor.sh"
+  },
+  "keywords": [
+    "unraid",
+    "plugin",
+    "supermicro",
+    "ipmi",
+    "bmc",
+    "server",
+    "management",
+    "monitoring"
+  ],
+  "author": "ShunHax <shunhax@shunhax.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool/issues"
+  },
+  "homepage": "https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool#readme",
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "files": [
+    "plugin.php",
+    "supermicro-ipmi.php",
+    "includes/",
+    "css/",
+    "js/",
+    "scripts/",
+    "images/",
+    "README.md"
+  ],
+  "unraid": {
+    "plugin": {
+      "name": "Supermicro BMC/IPMI Tool",
+      "description": "Manage Supermicro motherboards with IPMI support using IPMICFG utility",
+      "version": "1.0.0",
+      "author": "ShunHax",
+      "support": "https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool/issues",
+      "icon": "images/icon.png",
+      "page": "supermicro-ipmi.php",
+      "settings": "settings.php"
+    }
+  }
+} 

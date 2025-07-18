@@ -1,0 +1,13 @@
+# This is a placeholder for the plugin icon
+# In a real implementation, this would be a PNG file
+# The icon should be 64x64 pixels for optimal display in Unraid
+# 
+# Icon design should represent:
+# - Server/computer hardware
+# - IPMI/BMC management
+# - Supermicro branding colors (blue/white)
+# 
+# Example icon could be:
+# - Server tower with IPMI symbol
+# - Circuit board with management interface
+# - Supermicro logo with IPMI text 
