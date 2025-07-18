@@ -1,5 +1,5 @@
-<?xml version="1.0" standalone="yes"?>
-<PLUGIN name="supermicro-ipmi" author="ShunHax" version="1.0.0" launch="Settings/Supermicro-IPMI" pluginURL="https://raw.githubusercontent.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool/master/supermicro-ipmi.plg" support="https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool" min="6.8" max="6.12.99">
+<?xml version="1.0"?>
+<PLUGIN name="supermicro-ipmi" author="ShunHax" version="1.0.0" launch="Settings/Supermicro-IPMI" pluginURL="https://raw.githubusercontent.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool/master/supermicro-ipmi.plg" support="https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool" min="6.8">
 
 <CHANGES>
 ##supermicro-ipmi

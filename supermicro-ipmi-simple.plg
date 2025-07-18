@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<PLUGIN name="supermicro-ipmi" author="ShunHax" version="1.0.0" launch="Settings/Supermicro-IPMI" support="https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool" min="6.8" max="6.12.99">
+<PLUGIN name="supermicro-ipmi" author="ShunHax" version="1.0.0" launch="Settings/Supermicro-IPMI" support="https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool" min="6.8">
   <DESCRIPTION>Manage IPMI compatible Supermicro motherboards with the IPMICFG utility. Provides web-based interface for local and remote BMC management with automatic IPMICFG installation.</DESCRIPTION>
   <CHANGES>
 ##supermicro-ipmi
