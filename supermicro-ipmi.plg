@@ -11,7 +11,7 @@
 <!ENTITY plgNAME "&name;-&version;-x86_64-1">
 <!ENTITY emhttp "/usr/local/emhttp/plugins/&name;">
 ]>
-<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" support="https://github.com/&author;/Unraid-Supermicro-BMC-IPMI-Tool">
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" support="https://github.com/&author;/Unraid-Supermicro-BMC-IPMI-Tool" min="6.8" max="6.12.99">
 
 <CHANGES>
 ##&name;
@@ -27,6 +27,22 @@
 - Security features with authentication
 - Modern responsive UI design
 </CHANGES>
+
+<!--
+Plugin Description
+-->
+<DESCRIPTION>Manage IPMI compatible Supermicro motherboards with the IPMICFG utility. Provides web-based interface for local and remote BMC management with automatic IPMICFG installation.</DESCRIPTION>
+
+<!--
+Plugin Category
+-->
+<CATEGORY>System Management</CATEGORY>
+
+<!--
+Plugin Icons
+-->
+<ICON>fa-server</ICON>
+<ICON64>fa-server</ICON64>
 
 <!--
 This plugin uses IPMICFG to manage Supermicro BMC/IPMI
@@ -123,7 +139,7 @@ The 'install' script.
 -->
 <FILE Run="/bin/bash" Method="install">
 <INLINE>
-#Verify Unraid Version
+# Verify Unraid Version
 source /etc/unraid-version
 VER=${version:0:3}
 
@@ -132,29 +148,43 @@ if [[ $VER == 6.0 ]]; then
     exit 1
 fi
 
+# Create plugin directories
+mkdir -p &plgPATH;
+mkdir -p /var/local/plugins/&name;
+mkdir -p /tmp/plugins/&name;
+mkdir -p /var/cache/plugins/&name;
+mkdir -p /mnt/user/appdata/plugins/&name;/backup
+
 # Verify and install plugin package
-sum1=$(/usr/bin/md5sum &plgPATH;/&plgNAME;.txz)
-sum2=$(/usr/bin/cat &plgPATH;/&plgNAME;.md5)
-if [ "${sum1:0:32}" != "${sum2:0:32}" ]; then
-    echo "Wrong 'plugin' package md5 hash."
-    rm &plgPATH;/&plgNAME;.txz \
-         &plgPATH;/&plgNAME;.md5
-    exit 1
+if [ -f "&plgPATH;/&plgNAME;.txz" ] && [ -f "&plgPATH;/&plgNAME;.md5" ]; then
+    sum1=$(/usr/bin/md5sum &plgPATH;/&plgNAME;.txz)
+    sum2=$(/usr/bin/cat &plgPATH;/&plgNAME;.md5)
+    if [ "${sum1:0:32}" != "${sum2:0:32}" ]; then
+        echo "Wrong 'plugin' package md5 hash."
+        rm &plgPATH;/&plgNAME;.txz &plgPATH;/&plgNAME;.md5
+        exit 1
+    else
+        upgradepkg --install-new &plgPATH;/&plgNAME;.txz
+    fi
 else
+    echo "Plugin package files not found. Installing from source..."
+    # Install from source files if package not available
+    if [ ! -d "&emhttp;" ]; then
+        mkdir -p &emhttp;
+    fi
+fi
 
-    upgradepkg --install-new &plgPATH;/&plgNAME;.txz
+# Start scripts
+echo "starting &name; services..."
+at -M -f /tmp/start_&name; now 2&gt;/dev/null
 
-    # Start scripts
-    echo "starting &name; services..."
-    at -M -f /tmp/start_&name; now 2&gt;/dev/null
+sleep 1
 
-    sleep 1
+rm -f /tmp/start_&name;
 
-    rm -f /tmp/start_&name;
-
-    # Cleaning old source files
-    find &plgPATH;/ -type f -iname "&name;*.txz" ! -iname "*&version;*" -delete
-    find &plgPATH;/ -type f -iname "&name;*.md5" ! -iname "*&version;*" -delete
+# Cleaning old source files
+find &plgPATH;/ -type f -iname "&name;*.txz" ! -iname "*&version;*" -delete
+find &plgPATH;/ -type f -iname "&name;*.md5" ! -iname "*&version;*" -delete
 
 echo ""
 echo "-----------------------------------------------------------"
@@ -163,8 +193,6 @@ echo " Copyright 2024, &author;"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""
-
-fi
 </INLINE>
 </FILE>
 
