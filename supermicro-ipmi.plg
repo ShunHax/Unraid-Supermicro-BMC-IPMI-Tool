@@ -1,20 +1,8 @@
 <?xml version="1.0" standalone="yes"?>
-<!DOCTYPE PLUGIN [
-<!ENTITY name "supermicro-ipmi">
-<!ENTITY author "ShunHax">
-<!ENTITY version "1.0.0">
-<!ENTITY launch "Settings/Supermicro-IPMI">
-<!ENTITY gitURL "https://raw.githubusercontent.com/&author;/Unraid-Supermicro-BMC-IPMI-Tool/master">
-<!ENTITY pluginURL "&gitURL;/&name;.plg">
-<!ENTITY pkgURL "&gitURL;/packages">
-<!ENTITY plgPATH "/boot/config/plugins/&name;">
-<!ENTITY plgNAME "&name;-&version;-x86_64-1">
-<!ENTITY emhttp "/usr/local/emhttp/plugins/&name;">
-]>
-<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" support="https://github.com/&author;/Unraid-Supermicro-BMC-IPMI-Tool" min="6.8" max="6.12.99">
+<PLUGIN name="supermicro-ipmi" author="ShunHax" version="1.0.0" launch="Settings/Supermicro-IPMI" pluginURL="https://raw.githubusercontent.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool/master/supermicro-ipmi.plg" support="https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool" min="6.8" max="6.12.99">
 
 <CHANGES>
-##&name;
+##supermicro-ipmi
 ###1.0.0
 - Initial release
 - Automatic IPMICFG download and installation from Supermicro
@@ -47,15 +35,15 @@ Plugin Icons
 <!--
 This plugin uses IPMICFG to manage Supermicro BMC/IPMI
 -->
-<FILE Name="&plgPATH;/ipmicfg-1.36.0-x86_64-1sf.txz" Min="6.8" Run="/sbin/upgradepkg --install-new">
-<URL>&pkgURL;/ipmicfg-1.36.0-x86_64-1sf.txz</URL>
+<FILE Name="/boot/config/plugins/supermicro-ipmi/ipmicfg-1.36.0-x86_64-1sf.txz" Min="6.8" Run="/sbin/upgradepkg --install-new">
+<URL>https://raw.githubusercontent.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool/master/packages/ipmicfg-1.36.0-x86_64-1sf.txz</URL>
 <MD5>00000000000000000000000000000000</MD5>
 </FILE>
 
 <!--
 The 'plugin' config file.
 -->
-<FILE Name="&plgPATH;/&name;.cfg">
+<FILE Name="/boot/config/plugins/supermicro-ipmi/supermicro-ipmi.cfg">
 <INLINE>
 <![CDATA[
 LOCAL_BMC="enable"
@@ -82,22 +70,22 @@ SECURITY_TIMEOUT="3600"
 <!--
 The 'plugin' package file.
 -->
-<FILE Name="&plgPATH;/&plgNAME;.txz">
-<URL>&gitURL;/archive/&plgNAME;.txz</URL>
+<FILE Name="/boot/config/plugins/supermicro-ipmi/supermicro-ipmi-1.0.0-x86_64-1.txz">
+<URL>https://raw.githubusercontent.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool/master/archive/supermicro-ipmi-1.0.0-x86_64-1.txz</URL>
 </FILE>
 
 <!--
 The 'plugin' package MD5 hash.
 -->
-<FILE Name="&plgPATH;/&plgNAME;.md5">
-<URL>&gitURL;/archive/&plgNAME;.md5</URL>
+<FILE Name="/boot/config/plugins/supermicro-ipmi/supermicro-ipmi-1.0.0-x86_64-1.md5">
+<URL>https://raw.githubusercontent.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool/master/archive/supermicro-ipmi-1.0.0-x86_64-1.md5</URL>
 </FILE>
 
 <!-- WORKAROUND -->
-<FILE Name="/tmp/start_&name;" Mode="0770">
+<FILE Name="/tmp/start_supermicro-ipmi" Mode="0770">
 <INLINE>
 #!/bin/bash
-CONFIG=&plgPATH;/&name;.cfg
+CONFIG=/boot/config/plugins/supermicro-ipmi/supermicro-ipmi.cfg
 
 # read our configuration
 if [ -e "$CONFIG" ]; then
@@ -113,24 +101,24 @@ done
 # Install IPMICFG if not present
 if [ ! -f "$IPMICFG_PATH" ]; then
     echo "installing IPMICFG..."
-    &emhttp;/scripts/install_ipmicfg.sh
+    /usr/local/emhttp/plugins/supermicro-ipmi/scripts/install_ipmicfg.sh
 fi
 
 # Set up cron job for monitoring
-if [ ! -f "/etc/cron.d/&name;" ]; then
-    echo "*/5 * * * * root &emhttp;/scripts/monitor.sh >/dev/null 2>&1" > /etc/cron.d/&name;
+if [ ! -f "/etc/cron.d/supermicro-ipmi" ]; then
+    echo "*/5 * * * * root /usr/local/emhttp/plugins/supermicro-ipmi/scripts/monitor.sh >/dev/null 2>&1" > /etc/cron.d/supermicro-ipmi;
 fi
 
 # Create plugin directories
-mkdir -p /var/local/plugins/&name;
-mkdir -p /tmp/plugins/&name;
-mkdir -p /var/cache/plugins/&name;
-mkdir -p /mnt/user/appdata/plugins/&name;/backup
+mkdir -p /var/local/plugins/supermicro-ipmi
+mkdir -p /tmp/plugins/supermicro-ipmi
+mkdir -p /var/cache/plugins/supermicro-ipmi
+mkdir -p /mnt/user/appdata/plugins/supermicro-ipmi/backup
 
 # Set permissions
-chmod +x &emhttp;/scripts/monitor.sh
-chmod +x &emhttp;/scripts/install_ipmicfg.sh
-chown -R root:root &emhttp;
+chmod +x /usr/local/emhttp/plugins/supermicro-ipmi/scripts/monitor.sh
+chmod +x /usr/local/emhttp/plugins/supermicro-ipmi/scripts/install_ipmicfg.sh
+chown -R root:root /usr/local/emhttp/plugins/supermicro-ipmi
 </INLINE>
 </FILE>
 
@@ -149,48 +137,48 @@ if [[ $VER == 6.0 ]]; then
 fi
 
 # Create plugin directories
-mkdir -p &plgPATH;
-mkdir -p /var/local/plugins/&name;
-mkdir -p /tmp/plugins/&name;
-mkdir -p /var/cache/plugins/&name;
-mkdir -p /mnt/user/appdata/plugins/&name;/backup
+mkdir -p /boot/config/plugins/supermicro-ipmi
+mkdir -p /var/local/plugins/supermicro-ipmi
+mkdir -p /tmp/plugins/supermicro-ipmi
+mkdir -p /var/cache/plugins/supermicro-ipmi
+mkdir -p /mnt/user/appdata/plugins/supermicro-ipmi/backup
 
 # Verify and install plugin package
-if [ -f "&plgPATH;/&plgNAME;.txz" ] && [ -f "&plgPATH;/&plgNAME;.md5" ]; then
-    sum1=$(/usr/bin/md5sum &plgPATH;/&plgNAME;.txz)
-    sum2=$(/usr/bin/cat &plgPATH;/&plgNAME;.md5)
+if [ -f "/boot/config/plugins/supermicro-ipmi/supermicro-ipmi-1.0.0-x86_64-1.txz" ] && [ -f "/boot/config/plugins/supermicro-ipmi/supermicro-ipmi-1.0.0-x86_64-1.md5" ]; then
+    sum1=$(/usr/bin/md5sum /boot/config/plugins/supermicro-ipmi/supermicro-ipmi-1.0.0-x86_64-1.txz)
+    sum2=$(/usr/bin/cat /boot/config/plugins/supermicro-ipmi/supermicro-ipmi-1.0.0-x86_64-1.md5)
     if [ "${sum1:0:32}" != "${sum2:0:32}" ]; then
         echo "Wrong 'plugin' package md5 hash."
-        rm &plgPATH;/&plgNAME;.txz &plgPATH;/&plgNAME;.md5
+        rm /boot/config/plugins/supermicro-ipmi/supermicro-ipmi-1.0.0-x86_64-1.txz /boot/config/plugins/supermicro-ipmi/supermicro-ipmi-1.0.0-x86_64-1.md5
         exit 1
     else
-        upgradepkg --install-new &plgPATH;/&plgNAME;.txz
+        upgradepkg --install-new /boot/config/plugins/supermicro-ipmi/supermicro-ipmi-1.0.0-x86_64-1.txz
     fi
 else
     echo "Plugin package files not found. Installing from source..."
     # Install from source files if package not available
-    if [ ! -d "&emhttp;" ]; then
-        mkdir -p &emhttp;
+    if [ ! -d "/usr/local/emhttp/plugins/supermicro-ipmi" ]; then
+        mkdir -p /usr/local/emhttp/plugins/supermicro-ipmi
     fi
 fi
 
 # Start scripts
-echo "starting &name; services..."
-at -M -f /tmp/start_&name; now 2&gt;/dev/null
+echo "starting supermicro-ipmi services..."
+at -M -f /tmp/start_supermicro-ipmi now 2&gt;/dev/null
 
 sleep 1
 
-rm -f /tmp/start_&name;
+rm -f /tmp/start_supermicro-ipmi
 
 # Cleaning old source files
-find &plgPATH;/ -type f -iname "&name;*.txz" ! -iname "*&version;*" -delete
-find &plgPATH;/ -type f -iname "&name;*.md5" ! -iname "*&version;*" -delete
+find /boot/config/plugins/supermicro-ipmi/ -type f -iname "supermicro-ipmi*.txz" ! -iname "*1.0.0*" -delete
+find /boot/config/plugins/supermicro-ipmi/ -type f -iname "supermicro-ipmi*.md5" ! -iname "*1.0.0*" -delete
 
 echo ""
 echo "-----------------------------------------------------------"
-echo " &name; has been installed."
-echo " Copyright 2024, &author;"
-echo " Version: &version;"
+echo " supermicro-ipmi has been installed."
+echo " Copyright 2024, ShunHax"
+echo " Version: 1.0.0"
 echo "-----------------------------------------------------------"
 echo ""
 </INLINE>
@@ -202,18 +190,18 @@ The 'remove' script.
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
 #stop daemon
-echo "stopping &name; services..."
+echo "stopping supermicro-ipmi services..."
 /etc/rc.d/rc.ipmiseld stop 2&gt;/dev/null
 sleep 1
 
 # Remove cron job
-rm -f /etc/cron.d/&name;
+rm -f /etc/cron.d/supermicro-ipmi
 
 # Remove plugin files
-removepkg &plgPATH;/*.txz 2&gt;/dev/null
-rm -rf &emhttp;
-rm -f &plgPATH;/*.txz \
-  &plgPATH;/*.md5
+removepkg /boot/config/plugins/supermicro-ipmi/*.txz 2&gt;/dev/null
+rm -rf /usr/local/emhttp/plugins/supermicro-ipmi
+rm -f /boot/config/plugins/supermicro-ipmi/*.txz \
+  /boot/config/plugins/supermicro-ipmi/*.md5
 
 echo "unloading ipmi drivers..."
 for module in ipmi_msghandler ipmi_devintf ipmi_si; do
@@ -222,9 +210,9 @@ done
 
 echo ""
 echo "-----------------------------------------------------------"
-echo " &name; has been removed."
-echo " Copyright 2024, &author;"
-echo " Version: &version;"
+echo " supermicro-ipmi has been removed."
+echo " Copyright 2024, ShunHax"
+echo " Version: 1.0.0"
 echo "-----------------------------------------------------------"
 echo ""
 </INLINE>
