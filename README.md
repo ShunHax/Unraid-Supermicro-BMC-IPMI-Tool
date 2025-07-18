@@ -40,63 +40,64 @@ A comprehensive Unraid plugin for managing Supermicro motherboards with IPMI sup
 
 ### Software Requirements
 - Unraid 6.8 or later
-- IPMICFG utility from Supermicro
+- IPMICFG utility (automatically downloaded during installation)
 - PHP 7.4 or later
 - Web server (Apache/Nginx)
 
 ## Installation
 
-### Step 1: Download IPMICFG
+### Method 1: Plugin Manager (Recommended)
 
-1. Visit the [Supermicro IPMICFG download page](https://www.supermicro.com/support/faqs/faq.cfm?faq=16428)
-2. Download the appropriate version for your system architecture (x86_64 recommended)
-3. Extract the archive and locate the `ipmicfg` binary
+1. **Download the .plg file** to your local computer
+2. **Open your Unraid Web Interface**
+3. **Go to the Apps tab**
+4. **Click "Install Plugin"** (usually a button or option in the Apps section)
+5. **Upload the `supermicro-ipmi.plg` file**
+6. **Click Install**
 
-### Step 2: Install IPMICFG
+The plugin manager will automatically:
+- Download all the plugin files from the repository
+- Install them to the correct location
+- Set proper permissions
+- Restart the web interface
+- **Automatically download and install IPMICFG from Supermicro**
+
+### Method 2: Manual Installation
+
+If you prefer manual installation:
 
 ```bash
-# Copy IPMICFG to the system path
-sudo cp ipmicfg /usr/local/sbin/
-sudo chmod +x /usr/local/sbin/ipmicfg
+# SSH into your Unraid server
+ssh root@your-unraid-server-ip
 
-# Test the installation
-ipmicfg -s
+# Download the .plg file
+cd /tmp
+wget https://raw.githubusercontent.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool/main/supermicro-ipmi.plg
+
+# Install the plugin
+installplg supermicro-ipmi.plg
 ```
 
-### Step 3: Install the Plugin
+### Method 3: Direct File Installation
 
-1. **Manual Installation**:
-   ```bash
-   # Download the plugin
-   cd /tmp
-   wget https://github.com/ShunHax/supermicro-ipmi/archive/main.zip
-   unzip main.zip
-   
-   # Install to Unraid plugins directory
-   sudo cp -r supermicro-ipmi-main /usr/local/emhttp/plugins/supermicro-ipmi
-   sudo chmod +x /usr/local/emhttp/plugins/supermicro-ipmi/scripts/monitor.sh
-   ```
+```bash
+# SSH into your Unraid server
+ssh root@your-unraid-server-ip
 
-2. **Plugin Manager Installation** (if available):
-   - Go to Unraid Web Interface → Apps
-   - Search for "Supermicro IPMI"
-   - Click Install
+# Download and install directly
+cd /tmp
+wget https://raw.githubusercontent.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool/main/supermicro-ipmi.plg
+installplg supermicro-ipmi.plg
+```
 
-### Step 4: Configure the Plugin
+## What Happens During Installation
 
-1. Access the plugin from the Unraid Web Interface
-2. Go to Settings and configure:
-   - **Local BMC**: Enable and set IPMICFG path
-   - **Remote BMC**: Configure if needed
-   - **GUI Settings**: Customize refresh intervals
-   - **Security**: Set authentication requirements
-
-### Step 5: Verify Installation
-
-1. Check the plugin appears in the Unraid interface
-2. Test BMC connectivity
-3. Verify sensor readings are displayed
-4. Test power control functions
+1. **Plugin Installation**: The plugin files are copied to `/usr/local/emhttp/plugins/supermicro-ipmi/`
+2. **Automatic IPMICFG Download**: The plugin will automatically download IPMICFG from Supermicro
+3. **IPMICFG Installation**: The tool is extracted and installed to `/usr/local/sbin/ipmicfg`
+4. **Permission Setup**: Proper permissions are set for security
+5. **Testing**: The installation is tested to ensure it works
+6. **Service Setup**: Cron jobs and monitoring services are configured
 
 ## Configuration
 
@@ -184,7 +185,10 @@ ipmicfg -s
 ```
 Error: IPMICFG not found at /usr/local/sbin/ipmicfg
 ```
-**Solution**: Download and install IPMICFG from Supermicro website
+**Solution**: The plugin should automatically download IPMICFG. If it fails, run:
+```bash
+/usr/local/emhttp/plugins/supermicro-ipmi/scripts/install_ipmicfg.sh
+```
 
 #### BMC Connection Failed
 ```
@@ -249,130 +253,49 @@ Enable debug logging by editing the configuration:
 
 ### Data Protection
 - Encrypt sensitive configuration data
-- Regular backup of configuration files
-- Secure storage of credentials
-- Audit trail maintenance
-
-## API Reference
-
-### REST Endpoints
-
-#### Power Management
-```
-POST /plugins/supermicro-ipmi/api/power
-{
-  "action": "on|off|reset|cycle"
-}
-```
-
-#### Sensor Data
-```
-GET /plugins/supermicro-ipmi/api/sensors
-```
-
-#### Event Log
-```
-GET /plugins/supermicro-ipmi/api/events
-POST /plugins/supermicro-ipmi/api/events/clear
-```
-
-#### User Management
-```
-GET /plugins/supermicro-ipmi/api/users
-POST /plugins/supermicro-ipmi/api/users
-PUT /plugins/supermicro-ipmi/api/users/{id}
-DELETE /plugins/supermicro-ipmi/api/users/{id}
-```
-
-### Response Format
-
-```json
-{
-  "success": true,
-  "message": "Operation completed successfully",
-  "data": {
-    // Response data
-  }
-}
-```
+- Regular backup of plugin settings
+- Monitor for unauthorized access attempts
 
 ## Development
 
-### Building from Source
+### Building the Plugin Package
+
+To create the plugin package for distribution:
 
 ```bash
-# Clone the repository
-git clone https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool.git
-cd supermicro-ipmi
+# Create the package directory
+mkdir -p supermicro-ipmi-1.0.0-x86_64-1/usr/local/emhttp/plugins/supermicro-ipmi
 
-# Install dependencies
-npm install
+# Copy plugin files
+cp -r * supermicro-ipmi-1.0.0-x86_64-1/usr/local/emhttp/plugins/supermicro-ipmi/
 
-# Build the plugin
-npm run build
+# Create the package
+makepkg supermicro-ipmi-1.0.0-x86_64-1.txz
+
+# Generate MD5 hash
+md5sum supermicro-ipmi-1.0.0-x86_64-1.txz > supermicro-ipmi-1.0.0-x86_64-1.md5
 ```
-
-### Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-### Testing
-
-```bash
-# Run unit tests
-npm test
-
-# Run integration tests
-npm run test:integration
-
-# Run linting
-npm run lint
-```
-
-## Support
-
-### Documentation
-- [User Guide](docs/user-guide.md)
-- [API Documentation](docs/api.md)
-- [Troubleshooting Guide](docs/troubleshooting.md)
-
-### Community
-- [GitHub Issues](https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool/issues)
-- [Discussions](https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool/discussions)
-- [Wiki](https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool/wiki)
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Acknowledgments
+## Support
 
-- Supermicro for providing the IPMICFG utility
-- Unraid community for feedback and testing
-- Contributors and maintainers
+- **GitHub Issues**: [Report bugs or request features](https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool/issues)
+- **Documentation**: [Plugin documentation](https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool/wiki)
+- **Community**: [Unraid Community Forums](https://forums.unraid.net/)
 
 ## Changelog
 
 ### Version 1.0.0
 - Initial release
-- Basic power management
-- Sensor monitoring
-- User management
-- Event logging
+- Automatic IPMICFG download and installation from Supermicro
+- Web-based BMC management interface
+- Power control (on/off/reset/power cycle)
+- Sensor monitoring with real-time updates
+- User management for BMC accounts
+- Event log viewing and filtering
 - Local and remote BMC support
-
-### Version 1.1.0 (Planned)
-- Advanced sensor graphing
-- Email notifications
-- Mobile-responsive design
-- API improvements
-- Performance optimizations
-
----
-
-**Note**: This plugin requires the IPMICFG utility from Supermicro. Please ensure you comply with Supermicro's licensing terms when using their software. # Supermicro-IPMI
-# Supermicro-IPMI
+- Security features with authentication
+- Modern responsive UI design

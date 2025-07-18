@@ -1,40 +1,205 @@
-<?xml version="1.0"?>
-<PLUGIN name="supermicro-ipmi" version="1.0.0" author="ShunHax" support="https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool">
-  <DESCRIPTION>Manage IPMI compatible Supermicro motherboards with the IPMICFG utility. Provides web-based interface for local and remote BMC management.</DESCRIPTION>
-  <CHANGELOG>
-    <ENTRY version="1.0.0" date="2024-01-01">
-      <CHANGE>Initial release</CHANGE>
-      <CHANGE>Automatic IPMICFG download and installation</CHANGE>
-      <CHANGE>Web-based BMC management interface</CHANGE>
-      <CHANGE>Power control, sensor monitoring, user management</CHANGE>
-    </ENTRY>
-  </CHANGELOG>
-  <FILES>
-    <FILE name="/usr/local/emhttp/plugins/supermicro-ipmi/plugin.php" />
-    <FILE name="/usr/local/emhttp/plugins/supermicro-ipmi/supermicro-ipmi.php" />
-    <FILE name="/usr/local/emhttp/plugins/supermicro-ipmi/settings.php" />
-    <FILE name="/usr/local/emhttp/plugins/supermicro-ipmi/includes/functions.php" />
-    <FILE name="/usr/local/emhttp/plugins/supermicro-ipmi/includes/ipmi.php" />
-    <FILE name="/usr/local/emhttp/plugins/supermicro-ipmi/includes/gui.php" />
-    <FILE name="/usr/local/emhttp/plugins/supermicro-ipmi/scripts/monitor.sh" />
-    <FILE name="/usr/local/emhttp/plugins/supermicro-ipmi/scripts/install_ipmicfg.sh" />
-    <FILE name="/usr/local/emhttp/plugins/supermicro-ipmi/css/style.css" />
-    <FILE name="/usr/local/emhttp/plugins/supermicro-ipmi/js/script.js" />
-    <FILE name="/usr/local/emhttp/plugins/supermicro-ipmi/images/icon.png" />
-  </FILES>
-  <INSTALL>
-    <CMD>mkdir -p /usr/local/emhttp/plugins/supermicro-ipmi</CMD>
-    <CMD>chmod +x /usr/local/emhttp/plugins/supermicro-ipmi/scripts/monitor.sh</CMD>
-    <CMD>chmod +x /usr/local/emhttp/plugins/supermicro-ipmi/scripts/install_ipmicfg.sh</CMD>
-    <CMD>chown -R root:root /usr/local/emhttp/plugins/supermicro-ipmi</CMD>
-  </INSTALL>
-  <UNINSTALL>
-    <CMD>rm -rf /usr/local/emhttp/plugins/supermicro-ipmi</CMD>
-    <CMD>rm -f /etc/cron.d/supermicro-ipmi</CMD>
-  </UNINSTALL>
-  <UPGRADE>
-    <CMD>chmod +x /usr/local/emhttp/plugins/supermicro-ipmi/scripts/monitor.sh</CMD>
-    <CMD>chmod +x /usr/local/emhttp/plugins/supermicro-ipmi/scripts/install_ipmicfg.sh</CMD>
-    <CMD>chown -R root:root /usr/local/emhttp/plugins/supermicro-ipmi</CMD>
-  </UPGRADE>
+<?xml version="1.0" standalone="yes"?>
+<!DOCTYPE PLUGIN [
+<!ENTITY name "supermicro-ipmi">
+<!ENTITY author "ShunHax">
+<!ENTITY version "1.0.0">
+<!ENTITY launch "Settings/Supermicro-IPMI">
+<!ENTITY gitURL "https://raw.githubusercontent.com/&author;/Unraid-Supermicro-BMC-IPMI-Tool/master">
+<!ENTITY pluginURL "&gitURL;/&name;.plg">
+<!ENTITY pkgURL "&gitURL;/packages">
+<!ENTITY plgPATH "/boot/config/plugins/&name;">
+<!ENTITY plgNAME "&name;-&version;-x86_64-1">
+<!ENTITY emhttp "/usr/local/emhttp/plugins/&name;">
+]>
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" support="https://github.com/&author;/Unraid-Supermicro-BMC-IPMI-Tool">
+
+<CHANGES>
+##&name;
+###1.0.0
+- Initial release
+- Automatic IPMICFG download and installation from Supermicro
+- Web-based BMC management interface
+- Power control (on/off/reset/power cycle)
+- Sensor monitoring with real-time updates
+- User management for BMC accounts
+- Event log viewing and filtering
+- Local and remote BMC support
+- Security features with authentication
+- Modern responsive UI design
+</CHANGES>
+
+<!--
+This plugin uses IPMICFG to manage Supermicro BMC/IPMI
+-->
+<FILE Name="&plgPATH;/ipmicfg-1.36.0-x86_64-1sf.txz" Min="6.8" Run="/sbin/upgradepkg --install-new">
+<URL>&pkgURL;/ipmicfg-1.36.0-x86_64-1sf.txz</URL>
+<MD5>00000000000000000000000000000000</MD5>
+</FILE>
+
+<!--
+The 'plugin' config file.
+-->
+<FILE Name="&plgPATH;/&name;.cfg">
+<INLINE>
+<![CDATA[
+LOCAL_BMC="enable"
+LOCAL_DEVICE="/dev/ipmi0"
+IPMICFG_PATH="/usr/local/sbin/ipmicfg"
+REMOTE_BMC="disable"
+REMOTE_HOST=""
+REMOTE_PORT="623"
+REMOTE_USER=""
+REMOTE_PASSWORD=""
+REMOTE_PRIVILEGE="ADMINISTRATOR"
+GUI_REFRESH="30"
+GUI_AUTO_REFRESH="enable"
+GUI_SHOW_SENSORS="enable"
+GUI_SHOW_EVENTS="enable"
+GUI_SHOW_USERS="enable"
+SECURITY_AUTH="enable"
+SECURITY_USERS="root"
+SECURITY_TIMEOUT="3600"
+]]>
+</INLINE>
+</FILE>
+
+<!--
+The 'plugin' package file.
+-->
+<FILE Name="&plgPATH;/&plgNAME;.txz">
+<URL>&gitURL;/archive/&plgNAME;.txz</URL>
+</FILE>
+
+<!--
+The 'plugin' package MD5 hash.
+-->
+<FILE Name="&plgPATH;/&plgNAME;.md5">
+<URL>&gitURL;/archive/&plgNAME;.md5</URL>
+</FILE>
+
+<!-- WORKAROUND -->
+<FILE Name="/tmp/start_&name;" Mode="0770">
+<INLINE>
+#!/bin/bash
+CONFIG=&plgPATH;/&name;.cfg
+
+# read our configuration
+if [ -e "$CONFIG" ]; then
+    source "$CONFIG"
+fi
+
+# Load IPMI drivers
+echo "loading ipmi drivers..."
+for module in ipmi_msghandler ipmi_devintf ipmi_si; do
+    modprobe -q $module
+done
+
+# Install IPMICFG if not present
+if [ ! -f "$IPMICFG_PATH" ]; then
+    echo "installing IPMICFG..."
+    &emhttp;/scripts/install_ipmicfg.sh
+fi
+
+# Set up cron job for monitoring
+if [ ! -f "/etc/cron.d/&name;" ]; then
+    echo "*/5 * * * * root &emhttp;/scripts/monitor.sh >/dev/null 2>&1" > /etc/cron.d/&name;
+fi
+
+# Create plugin directories
+mkdir -p /var/local/plugins/&name;
+mkdir -p /tmp/plugins/&name;
+mkdir -p /var/cache/plugins/&name;
+mkdir -p /mnt/user/appdata/plugins/&name;/backup
+
+# Set permissions
+chmod +x &emhttp;/scripts/monitor.sh
+chmod +x &emhttp;/scripts/install_ipmicfg.sh
+chown -R root:root &emhttp;
+</INLINE>
+</FILE>
+
+<!--
+The 'install' script.
+-->
+<FILE Run="/bin/bash" Method="install">
+<INLINE>
+#Verify Unraid Version
+source /etc/unraid-version
+VER=${version:0:3}
+
+if [[ $VER == 6.0 ]]; then
+    echo "Unraid version 6.1 or higher is required"
+    exit 1
+fi
+
+# Verify and install plugin package
+sum1=$(/usr/bin/md5sum &plgPATH;/&plgNAME;.txz)
+sum2=$(/usr/bin/cat &plgPATH;/&plgNAME;.md5)
+if [ "${sum1:0:32}" != "${sum2:0:32}" ]; then
+    echo "Wrong 'plugin' package md5 hash."
+    rm &plgPATH;/&plgNAME;.txz \
+         &plgPATH;/&plgNAME;.md5
+    exit 1
+else
+
+    upgradepkg --install-new &plgPATH;/&plgNAME;.txz
+
+    # Start scripts
+    echo "starting &name; services..."
+    at -M -f /tmp/start_&name; now 2&gt;/dev/null
+
+    sleep 1
+
+    rm -f /tmp/start_&name;
+
+    # Cleaning old source files
+    find &plgPATH;/ -type f -iname "&name;*.txz" ! -iname "*&version;*" -delete
+    find &plgPATH;/ -type f -iname "&name;*.md5" ! -iname "*&version;*" -delete
+
+echo ""
+echo "-----------------------------------------------------------"
+echo " &name; has been installed."
+echo " Copyright 2024, &author;"
+echo " Version: &version;"
+echo "-----------------------------------------------------------"
+echo ""
+
+fi
+</INLINE>
+</FILE>
+
+<!--
+The 'remove' script.
+-->
+<FILE Run="/bin/bash" Method="remove">
+<INLINE>
+#stop daemon
+echo "stopping &name; services..."
+/etc/rc.d/rc.ipmiseld stop 2&gt;/dev/null
+sleep 1
+
+# Remove cron job
+rm -f /etc/cron.d/&name;
+
+# Remove plugin files
+removepkg &plgPATH;/*.txz 2&gt;/dev/null
+rm -rf &emhttp;
+rm -f &plgPATH;/*.txz \
+  &plgPATH;/*.md5
+
+echo "unloading ipmi drivers..."
+for module in ipmi_msghandler ipmi_devintf ipmi_si; do
+    modprobe -r $module 2&gt;/dev/null
+done
+
+echo ""
+echo "-----------------------------------------------------------"
+echo " &name; has been removed."
+echo " Copyright 2024, &author;"
+echo " Version: &version;"
+echo "-----------------------------------------------------------"
+echo ""
+</INLINE>
+</FILE>
+
 </PLUGIN> 
