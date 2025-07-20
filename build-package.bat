@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 REM Build script for Supermicro IPMI Plugin Package (Windows)
-REM This script creates a proper TXZ package for Unraid installation
+REM Following SimonFair's clean structure pattern
 
 REM Configuration
 set PLUGIN_NAME=supermicro-ipmi
@@ -10,7 +10,7 @@ set VERSION=1.0.0
 set PACKAGE_NAME=%PLUGIN_NAME%-%VERSION%
 set BUILD_DIR=build
 set PACKAGE_DIR=%BUILD_DIR%\%PACKAGE_NAME%
-set FINAL_PACKAGE=%PACKAGE_NAME%.txz
+set FINAL_PACKAGE=archive\%PACKAGE_NAME%.txz
 
 echo Building Supermicro IPMI Plugin Package v%VERSION%...
 
@@ -27,8 +27,11 @@ mkdir "%PACKAGE_DIR%"
 REM Copy plugin files to package directory
 echo Copying plugin files...
 
-REM Main plugin files
-xcopy "package\usr" "%PACKAGE_DIR%\usr" /e /i /y
+REM Create the plugin directory structure
+mkdir "%PACKAGE_DIR%\usr\local\emhttp\plugins\%PLUGIN_NAME%"
+
+REM Copy plugin files
+xcopy "plugin\*" "%PACKAGE_DIR%\usr\local\emhttp\plugins\%PLUGIN_NAME%\" /e /i /y
 
 REM Copy additional files from root if they exist
 if exist "README.md" (
@@ -37,11 +40,6 @@ if exist "README.md" (
 
 if exist "LICENSE" (
     copy "LICENSE" "%PACKAGE_DIR%\"
-)
-
-REM Copy IPMICFG binary if it exists
-if exist "ipmicfg" (
-    xcopy "ipmicfg" "%PACKAGE_DIR%\ipmicfg" /e /i /y
 )
 
 REM Create package manifest
@@ -91,7 +89,7 @@ echo 6. The plugin will appear in your Unraid web interface
 echo.
 echo ## Post-Installation
 echo.
-echo 1. The plugin will automatically install the IPMICFG utility
+echo 1. The plugin will automatically install the included IPMICFG utility
 echo 2. Configure your BMC settings in the plugin interface
 echo 3. Access the plugin from the Unraid web interface
 echo.
@@ -99,7 +97,7 @@ echo ## Requirements
 echo.
 echo - Unraid 6.8.0 or higher
 echo - Supermicro motherboard with IPMI support
-echo - Network connectivity for IPMICFG download
+echo - Linux x64 architecture ^(IPMICFG binary included^)
 echo.
 echo ## Support
 echo.

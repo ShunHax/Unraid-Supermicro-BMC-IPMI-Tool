@@ -45,20 +45,37 @@ A comprehensive Unraid plugin for managing Supermicro motherboards with IPMI sup
 
 ## 📁 Project Structure
 
+Following SimonFair's clean organization pattern:
+
 ```
 Unraid-Supermicro-BMC-IPMI-Tool/
-├── package/                    # Plugin files for distribution
-│   └── usr/local/emhttp/plugins/supermicro-ipmi/
-├── ipmicfg/                    # IPMICFG binary
-│   └── IPMICFG-Linux.x86_64    # Linux x64 IPMICFG binary
+├── archive/                    # Built packages and releases
+│   └── supermicro-ipmi-1.0.0.txz
+├── packages/                   # Package definitions and CA templates
+│   ├── ca-template.xml         # Community Applications template
+│   └── supermicro-ipmi-ca.xml  # CA integration file
+├── plugin/                     # Plugin source files
+│   ├── plugin.php              # Plugin metadata
+│   ├── supermicro-ipmi.php     # Main plugin page
+│   ├── settings.php            # Settings page
+│   ├── install.sh              # Installation script
+│   ├── uninstall.sh            # Uninstallation script
+│   ├── includes/               # PHP includes
+│   ├── css/                    # Stylesheets
+│   ├── js/                     # JavaScript files
+│   ├── images/                 # Plugin icons
+│   ├── scripts/                # Utility scripts
+│   └── ipmicfg/                # IPMICFG binary
+│       └── IPMICFG-Linux.x86_64
+├── source/                     # Source code and documentation
+│   ├── PACKAGE_README.md       # User installation guide
+│   ├── PACKAGE_BUILD_README.md # Developer build guide
+│   ├── PACKAGE_SUMMARY.md      # Project summary
+│   ├── CA_SUBMISSION_GUIDE.md  # CA submission guide
+│   └── package.json            # Project metadata
+├── .github/workflows/          # Automated build and release
 ├── build-package.bat           # Windows build script
 ├── build-package.sh            # Linux build script
-├── create-txz.ps1              # PowerShell TXZ creator
-├── supermicro-ipmi-ca.xml      # Community Applications integration
-├── .github/workflows/          # Automated build and release
-├── PACKAGE_README.md           # User installation guide
-├── PACKAGE_BUILD_README.md     # Developer build guide
-├── PACKAGE_SUMMARY.md          # Project summary
 └── README.md                   # This file
 ```
 
@@ -69,7 +86,6 @@ For developers who want to build the package:
 ### Windows
 ```cmd
 build-package.bat
-.\create-txz.ps1
 ```
 
 ### Linux/Unraid
@@ -78,13 +94,14 @@ chmod +x build-package.sh
 ./build-package.sh
 ```
 
-See [PACKAGE_BUILD_README.md](PACKAGE_BUILD_README.md) for detailed development instructions.
+See [source/PACKAGE_BUILD_README.md](source/PACKAGE_BUILD_README.md) for detailed development instructions.
 
 ## 📖 Documentation
 
-- [Package Installation Guide](PACKAGE_README.md) - Complete user installation instructions
-- [Package Building Guide](PACKAGE_BUILD_README.md) - Developer build instructions
-- [Project Summary](PACKAGE_SUMMARY.md) - Overview of what's been created
+- [Package Installation Guide](source/PACKAGE_README.md) - Complete user installation instructions
+- [Package Building Guide](source/PACKAGE_BUILD_README.md) - Developer build instructions
+- [Project Summary](source/PACKAGE_SUMMARY.md) - Overview of what's been created
+- [CA Submission Guide](source/CA_SUBMISSION_GUIDE.md) - How to submit to Community Applications
 
 ## 🤝 Support
 
@@ -100,4 +117,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Supermicro for providing the IPMICFG utility
 - Unraid community for plugin development guidelines
+- SimonFair for the clean project structure inspiration
 - Contributors and testers

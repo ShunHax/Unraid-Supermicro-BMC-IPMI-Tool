@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Build script for Supermicro IPMI Plugin Package
-# This script creates a proper TXZ package for Unraid installation
+# Following SimonFair's clean structure pattern
 
 set -e
 
@@ -11,13 +11,18 @@ VERSION="1.0.0"
 PACKAGE_NAME="${PLUGIN_NAME}-${VERSION}"
 BUILD_DIR="build"
 PACKAGE_DIR="$BUILD_DIR/$PACKAGE_NAME"
-FINAL_PACKAGE="${PACKAGE_NAME}.txz"
+FINAL_PACKAGE="archive/${PACKAGE_NAME}.txz"
 
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
+
+# Logging function
+log() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"
+}
 
 # Error handling
 error_exit() {
@@ -50,8 +55,11 @@ mkdir -p "$PACKAGE_DIR"
 # Copy plugin files to package directory
 echo "Copying plugin files..."
 
-# Main plugin files
-cp -r package/usr "$PACKAGE_DIR/"
+# Create the plugin directory structure
+mkdir -p "$PACKAGE_DIR/usr/local/emhttp/plugins/$PLUGIN_NAME"
+
+# Copy plugin files
+cp -r plugin/* "$PACKAGE_DIR/usr/local/emhttp/plugins/$PLUGIN_NAME/"
 
 # Copy additional files from root if they exist
 if [ -f "README.md" ]; then
@@ -60,12 +68,6 @@ fi
 
 if [ -f "LICENSE" ]; then
     cp LICENSE "$PACKAGE_DIR/"
-fi
-
-# Copy IPMICFG binary if it exists
-if [ -d "ipmicfg" ]; then
-    cp -r ipmicfg "$PACKAGE_DIR/"
-    log "IPMICFG binary included in package"
 fi
 
 # Make scripts executable
@@ -118,7 +120,7 @@ cat > "$PACKAGE_DIR/INSTALL.md" << 'EOF'
 
 ## Post-Installation
 
-1. The plugin will automatically install the IPMICFG utility
+1. The plugin will automatically install the included IPMICFG utility
 2. Configure your BMC settings in the plugin interface
 3. Access the plugin from the Unraid web interface
 
@@ -126,7 +128,7 @@ cat > "$PACKAGE_DIR/INSTALL.md" << 'EOF'
 
 - Unraid 6.8.0 or higher
 - Supermicro motherboard with IPMI support
-- Network connectivity for IPMICFG download
+- Linux x64 architecture (IPMICFG binary included)
 
 ## Support
 
@@ -136,6 +138,7 @@ EOF
 
 # Create the TXZ package
 echo "Creating TXZ package..."
+mkdir -p archive
 cd "$BUILD_DIR"
 tar -cJf "../$FINAL_PACKAGE" "$PACKAGE_NAME"
 cd ..
@@ -160,5 +163,5 @@ echo "Package ready: $FINAL_PACKAGE"
 echo ""
 echo "To install on Unraid:"
 echo "1. Upload $FINAL_PACKAGE to your Unraid server"
-echo "2. SSH into Unraid and run: installpkg $FINAL_PACKAGE"
+echo "2. SSH into Unraid and run: installpkg $(basename $FINAL_PACKAGE)"
 echo "3. Or install via Community Applications" 
