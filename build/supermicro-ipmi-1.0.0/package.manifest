@@ -1,0 +1,14 @@
+Package: supermicro-ipmi
+Version: 1.0.0
+Description: Manage IPMI compatible Supermicro motherboards with the IPMICFG utility
+Author: ShunHax
+Maintainer: ShunHax <shunhax@shunhax.com>
+Homepage: https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool
+License: MIT
+Architecture: x86_64
+Section: unraid-plugins
+Priority: optional
+Depends: unraid (>=6.8.0)
+Conflicts: 
+Replaces: 
+Provides: supermicro-ipmi

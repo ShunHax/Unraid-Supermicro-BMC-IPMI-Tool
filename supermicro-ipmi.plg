@@ -1,221 +1,65 @@
-<?xml version="1.0"?>
-<PLUGIN name="supermicro-ipmi" author="ShunHax" version="1.0.0" launch="Settings/Supermicro-IPMI" pluginURL="https://raw.githubusercontent.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool/master/supermicro-ipmi.plg" support="https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool" min="6.8">
-
-<CHANGES>
-##supermicro-ipmi
-###1.0.0
-- Initial release
-- Automatic IPMICFG download and installation from Supermicro
-- Web-based BMC management interface
-- Power control (on/off/reset/power cycle)
-- Sensor monitoring with real-time updates
-- User management for BMC accounts
-- Event log viewing and filtering
-- Local and remote BMC support
-- Security features with authentication
-- Modern responsive UI design
-</CHANGES>
-
-<!--
-Plugin Description
--->
-<DESCRIPTION>Manage IPMI compatible Supermicro motherboards with the IPMICFG utility. Provides web-based interface for local and remote BMC management with automatic IPMICFG installation.</DESCRIPTION>
-
-<!--
-Plugin Category
--->
-<CATEGORY>System Management</CATEGORY>
-
-<!--
-Plugin Icons
--->
-<ICON>fa-server</ICON>
-<ICON64>fa-server</ICON64>
-
-<!--
-This plugin uses IPMICFG to manage Supermicro BMC/IPMI
--->
-<FILE Name="/boot/config/plugins/supermicro-ipmi/ipmicfg-1.36.0-x86_64-1sf.txz" Min="6.8" Run="/sbin/upgradepkg --install-new">
-<URL>https://raw.githubusercontent.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool/master/packages/ipmicfg-1.36.0-x86_64-1sf.txz</URL>
-<MD5>00000000000000000000000000000000</MD5>
-</FILE>
-
-<!--
-The 'plugin' config file.
--->
-<FILE Name="/boot/config/plugins/supermicro-ipmi/supermicro-ipmi.cfg">
-<INLINE>
-<![CDATA[
-LOCAL_BMC="enable"
-LOCAL_DEVICE="/dev/ipmi0"
-IPMICFG_PATH="/usr/local/sbin/ipmicfg"
-REMOTE_BMC="disable"
-REMOTE_HOST=""
-REMOTE_PORT="623"
-REMOTE_USER=""
-REMOTE_PASSWORD=""
-REMOTE_PRIVILEGE="ADMINISTRATOR"
-GUI_REFRESH="30"
-GUI_AUTO_REFRESH="enable"
-GUI_SHOW_SENSORS="enable"
-GUI_SHOW_EVENTS="enable"
-GUI_SHOW_USERS="enable"
-SECURITY_AUTH="enable"
-SECURITY_USERS="root"
-SECURITY_TIMEOUT="3600"
-]]>
-</INLINE>
-</FILE>
-
-<!--
-The 'plugin' package file.
--->
-<FILE Name="/boot/config/plugins/supermicro-ipmi/supermicro-ipmi-1.0.0-x86_64-1.txz">
-<URL>https://raw.githubusercontent.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool/master/archive/supermicro-ipmi-1.0.0-x86_64-1.txz</URL>
-</FILE>
-
-<!--
-The 'plugin' package MD5 hash.
--->
-<FILE Name="/boot/config/plugins/supermicro-ipmi/supermicro-ipmi-1.0.0-x86_64-1.md5">
-<URL>https://raw.githubusercontent.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool/master/archive/supermicro-ipmi-1.0.0-x86_64-1.md5</URL>
-</FILE>
-
-<!-- WORKAROUND -->
-<FILE Name="/tmp/start_supermicro-ipmi" Mode="0770">
-<INLINE>
+<?xml version="1.0" standalone="yes"?>
+<PLUGIN name="supermicro-ipmi" author="ShunHax" version="0.0.1">
+<FILE Run="/bin/bash" Method="install">
 #!/bin/bash
-CONFIG=/boot/config/plugins/supermicro-ipmi/supermicro-ipmi.cfg
+mkdir -p /usr/local/emhttp/plugins/supermicro-ipmi
 
-# read our configuration
-if [ -e "$CONFIG" ]; then
-    source "$CONFIG"
+# Copy files from the plugin source directory
+PLUGIN_SOURCE="/tmp/plugins/supermicro-ipmi"
+if [ -d "$PLUGIN_SOURCE" ]; then
+    echo "Copying files from $PLUGIN_SOURCE"
+    cp -r "$PLUGIN_SOURCE"/* /usr/local/emhttp/plugins/supermicro-ipmi/
+elif [ -d /tmp/supermicro-ipmi-plugin ]; then
+    echo "Copying files from /tmp/supermicro-ipmi-plugin"
+    cp -r /tmp/supermicro-ipmi-plugin/* /usr/local/emhttp/plugins/supermicro-ipmi/
+else
+    echo "No plugin files found, creating basic structure"
+    # Create basic files if source not found
+    cat > /usr/local/emhttp/plugins/supermicro-ipmi/plugin.php << 'EOF'
+<?php
+$plugin_name = "Supermicro BMC/IPMI Tool";
+$plugin_description = "Manage IPMI compatible Supermicro motherboards with the IPMICFG utility.";
+$plugin_version = "1.0.0";
+$plugin_author = "ShunHax";
+$plugin_support = "https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool";
+?>
+EOF
 fi
 
-# Load IPMI drivers
-echo "loading ipmi drivers..."
-for module in ipmi_msghandler ipmi_devintf ipmi_si; do
-    modprobe -q $module
-done
+# Remove the .plg file from the plugin directory
+rm -f /usr/local/emhttp/plugins/supermicro-ipmi/supermicro-ipmi.plg
 
-# Install IPMICFG if not present
-if [ ! -f "$IPMICFG_PATH" ]; then
-    echo "installing IPMICFG..."
+chmod +x /usr/local/emhttp/plugins/supermicro-ipmi/scripts/*.sh 2>/dev/null || true
+
+mkdir -p /boot/config/plugins/supermicro-ipmi
+
+if [ -f /usr/local/emhttp/plugins/supermicro-ipmi/images/icon.png ]; then
+    cp /usr/local/emhttp/plugins/supermicro-ipmi/images/icon.png /boot/config/plugins/supermicro-ipmi/icon.png
+fi
+
+modprobe ipmi_msghandler 2>/dev/null || true
+modprobe ipmi_devintf 2>/dev/null || true
+modprobe ipmi_si 2>/dev/null || true
+
+if [ -f /usr/local/emhttp/plugins/supermicro-ipmi/scripts/install_ipmicfg.sh ]; then
     /usr/local/emhttp/plugins/supermicro-ipmi/scripts/install_ipmicfg.sh
 fi
 
-# Set up cron job for monitoring
-if [ ! -f "/etc/cron.d/supermicro-ipmi" ]; then
-    echo "*/5 * * * * root /usr/local/emhttp/plugins/supermicro-ipmi/scripts/monitor.sh >/dev/null 2>&1" > /etc/cron.d/supermicro-ipmi;
+if [ -f /usr/local/emhttp/plugins/supermicro-ipmi/scripts/monitor.sh ]; then
+    echo "*/5 * * * * /usr/local/emhttp/plugins/supermicro-ipmi/scripts/monitor.sh" > /etc/cron.d/supermicro-ipmi
 fi
 
-# Create plugin directories
-mkdir -p /var/local/plugins/supermicro-ipmi
-mkdir -p /tmp/plugins/supermicro-ipmi
-mkdir -p /var/cache/plugins/supermicro-ipmi
-mkdir -p /mnt/user/appdata/plugins/supermicro-ipmi/backup
-
-# Set permissions
-chmod +x /usr/local/emhttp/plugins/supermicro-ipmi/scripts/monitor.sh
-chmod +x /usr/local/emhttp/plugins/supermicro-ipmi/scripts/install_ipmicfg.sh
-chown -R root:root /usr/local/emhttp/plugins/supermicro-ipmi
-</INLINE>
+echo "Supermicro IPMI plugin installed successfully!"
 </FILE>
-
-<!--
-The 'install' script.
--->
-<FILE Run="/bin/bash" Method="install">
-<INLINE>
-# Verify Unraid Version
-source /etc/unraid-version
-VER=${version:0:3}
-
-if [[ $VER == 6.0 ]]; then
-    echo "Unraid version 6.1 or higher is required"
-    exit 1
-fi
-
-# Create plugin directories
-mkdir -p /boot/config/plugins/supermicro-ipmi
-mkdir -p /var/local/plugins/supermicro-ipmi
-mkdir -p /tmp/plugins/supermicro-ipmi
-mkdir -p /var/cache/plugins/supermicro-ipmi
-mkdir -p /mnt/user/appdata/plugins/supermicro-ipmi/backup
-
-# Verify and install plugin package
-if [ -f "/boot/config/plugins/supermicro-ipmi/supermicro-ipmi-1.0.0-x86_64-1.txz" ] && [ -f "/boot/config/plugins/supermicro-ipmi/supermicro-ipmi-1.0.0-x86_64-1.md5" ]; then
-    sum1=$(/usr/bin/md5sum /boot/config/plugins/supermicro-ipmi/supermicro-ipmi-1.0.0-x86_64-1.txz)
-    sum2=$(/usr/bin/cat /boot/config/plugins/supermicro-ipmi/supermicro-ipmi-1.0.0-x86_64-1.md5)
-    if [ "${sum1:0:32}" != "${sum2:0:32}" ]; then
-        echo "Wrong 'plugin' package md5 hash."
-        rm /boot/config/plugins/supermicro-ipmi/supermicro-ipmi-1.0.0-x86_64-1.txz /boot/config/plugins/supermicro-ipmi/supermicro-ipmi-1.0.0-x86_64-1.md5
-        exit 1
-    else
-        upgradepkg --install-new /boot/config/plugins/supermicro-ipmi/supermicro-ipmi-1.0.0-x86_64-1.txz
-    fi
-else
-    echo "Plugin package files not found. Installing from source..."
-    # Install from source files if package not available
-    if [ ! -d "/usr/local/emhttp/plugins/supermicro-ipmi" ]; then
-        mkdir -p /usr/local/emhttp/plugins/supermicro-ipmi
-    fi
-fi
-
-# Start scripts
-echo "starting supermicro-ipmi services..."
-at -M -f /tmp/start_supermicro-ipmi now 2&gt;/dev/null
-
-sleep 1
-
-rm -f /tmp/start_supermicro-ipmi
-
-# Cleaning old source files
-find /boot/config/plugins/supermicro-ipmi/ -type f -iname "supermicro-ipmi*.txz" ! -iname "*1.0.0*" -delete
-find /boot/config/plugins/supermicro-ipmi/ -type f -iname "supermicro-ipmi*.md5" ! -iname "*1.0.0*" -delete
-
-echo ""
-echo "-----------------------------------------------------------"
-echo " supermicro-ipmi has been installed."
-echo " Copyright 2024, ShunHax"
-echo " Version: 1.0.0"
-echo "-----------------------------------------------------------"
-echo ""
-</INLINE>
-</FILE>
-
-<!--
-The 'remove' script.
--->
 <FILE Run="/bin/bash" Method="remove">
-<INLINE>
-#stop daemon
-echo "stopping supermicro-ipmi services..."
-/etc/rc.d/rc.ipmiseld stop 2&gt;/dev/null
-sleep 1
-
-# Remove cron job
+#!/bin/bash
+/etc/rc.d/rc.ipmiseld stop 2>/dev/null || true
 rm -f /etc/cron.d/supermicro-ipmi
-
-# Remove plugin files
-removepkg /boot/config/plugins/supermicro-ipmi/*.txz 2&gt;/dev/null
 rm -rf /usr/local/emhttp/plugins/supermicro-ipmi
-rm -f /boot/config/plugins/supermicro-ipmi/*.txz \
-  /boot/config/plugins/supermicro-ipmi/*.md5
-
-echo "unloading ipmi drivers..."
-for module in ipmi_msghandler ipmi_devintf ipmi_si; do
-    modprobe -r $module 2&gt;/dev/null
-done
-
-echo ""
-echo "-----------------------------------------------------------"
-echo " supermicro-ipmi has been removed."
-echo " Copyright 2024, ShunHax"
-echo " Version: 1.0.0"
-echo "-----------------------------------------------------------"
-echo ""
-</INLINE>
+rm -rf /boot/config/plugins/supermicro-ipmi
+modprobe -r ipmi_si 2>/dev/null || true
+modprobe -r ipmi_devintf 2>/dev/null || true
+modprobe -r ipmi_msghandler 2>/dev/null || true
+echo "Supermicro IPMI plugin removed successfully!"
 </FILE>
-
 </PLUGIN> 
