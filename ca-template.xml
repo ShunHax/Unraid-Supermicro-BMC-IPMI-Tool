@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<Container xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0">
+  <Name>Supermicro BMC/IPMI Tool</Name>
+  <Repository>shunhax/supermicro-ipmi</Repository>
+  <Registry>https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool</Registry>
+  <Project>https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool</Project>
+  <Overview>Manage IPMI compatible Supermicro motherboards with the IPMICFG utility. This plugin provides a web-based interface to monitor and configure your Supermicro BMC/IPMI settings directly from the Unraid web interface. Features include sensor monitoring, power management, user administration, and event logging.</Overview>
+  <Category>Tools:Utilities</Category>
+  <WebUI>http://[IP]:[PORT:80]/</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/CommunityApplications/unraid-ca-templates/master/templates/supermicro-ipmi.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool/main/package/usr/local/emhttp/plugins/supermicro-ipmi/images/icon.png</Icon>
+  <MinOSVersion>6.8.0</MinOSVersion>
+  <MaxOSVersion></MaxOSVersion>
+  <MinUnraidVersion>6.8.0</MinUnraidVersion>
+  <MaxUnraidVersion></MaxUnraidVersion>
+  <MinDockerVersion></MinDockerVersion>
+  <MaxDockerVersion></MaxDockerVersion>
+  <Requires>supermicro-ipmi-1.0.0.txz</Requires>
+  <Support>https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool/issues</Support>
+  <Project>https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool</Project>
+  <Maintainer>ShunHax</Maintainer>
+  <Email>shunhax@shunhax.com</Email>
+  <DonateText></DonateText>
+  <DonateLink></DonateLink>
+  <Beta>false</Beta>
+  <Deprecated>false</Deprecated>
+  <Hidden>false</Hidden>
+  <DateInstalled></DateInstalled>
+  <Installed>false</Installed>
+  <Changelog>https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool/releases</Changelog>
+  <PostText></PostText>
+  <Config Name="Plugin" Target="supermicro-ipmi-1.0.0.txz" Default="https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool/releases/download/v1.0.0/supermicro-ipmi-1.0.0.txz" Mode="download" Description="Plugin Package" Type="Variable" Display="always" Required="true" Mask="false">https://github.com/ShunHax/Unraid-Supermicro-BMC-IPMI-Tool/releases/download/v1.0.0/supermicro-ipmi-1.0.0.txz</Config>
+</Container> 
